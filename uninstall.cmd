@@ -1,3 +1,3 @@
-﻿sc stop CameraTogglerService 
+sc stop CameraTogglerService 
 timeout 2
 sc delete CameraTogglerService

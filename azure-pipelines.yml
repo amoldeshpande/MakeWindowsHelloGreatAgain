@@ -11,22 +11,38 @@ pool:
   vmImage: windows-latest
 
 variables:
-	solution: '**/*.slnx'
-	buildPlatform: 'Any CPU'
-	buildConfiguration: 'Release'
+    solution: '**/*.slnx'
+    buildPlatform: 'Any CPU'
+    buildConfiguration: 'Release'
 
 steps:
 - task: VSBuild@1
   inputs:
-  	solution: '$(solution)'
-	platform: '$(buildPlatform)'
-	configuration: '$(buildConfiguration)'
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: '$(Build.SourcesDirectory)/bin/$(buildConfiguration)'
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+- task: ArchiveFiles@2
+  displayName: 'Zip Build Artifacts'
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/release.zip'
+    replaceExistingArchive: true
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/release.zip'
+    artifact: 'release-zip'
 
 - task: GitHubRelease@1
   inputs:
-    gitHubConnection: github.com_amoldeshpande
-    repositoryName: $(Build.RepositoryName)
-    tagSource: 'manual'
+    gitHubConnection: github.com_amoldeshpande_somehow_different
+    repositoryName: $(Build.Repository.Name)
+    tagSource: 'userSpecifiedTag'
     tag: $(Build.BuildNumber)
-    title: $(BuildTitle) Release From $(Build.SourceBranchName)
-    assets: $(System.DefaultWorkingDirectory)/bin/Release/*
+    title: $(Build.BuildId) Release From $(Build.SourceBranchName)
+    assets: '$(Build.ArtifactStagingDirectory)/release.zip'
+    assetUploadMode: 'replace'

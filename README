@@ -1,0 +1,16 @@
+In April 2025, Microsoft started requiring the color camera to see a visible face when using Windows Hello. This is for security reasons, but it causes Windows Hello to stop working in low light. 
+
+I don't need this enhanced security, so I finally got around to creating this service to turn off the RGB camera when the user logs out or locks the computer. This allows you to sign in with the IR camera alone, which works faster and in all lighting (or lack thereof) conditions.
+
+DO NOT USE this application if you are not OK with the downgraded security. In fact, don't use it if you are not me.
+
+To use:
+  1. Extract the release zip to a directory of your choosing.
+  2. Navigate to that directory and right-click "install.cmd" and choose "Run as administrator"
+
+You can use uninstall.cmd (as admin) to uninstall the service and then manually delete the install directory.
+
+Check that the camera string in the config file matches your color camera in Device Manager. On Alienware M16 R1s at least, the IR cameras is called "Integrated IR Webcam" and the color camera is "Integrated Webcam"
+
+Outstanding issues:
+	- Some laptops (Dell XPS 13) name both the cameras the same. I think the color camera is the root instance id (ends in all zeroes), but I am working to verify that. There is no way in the current version to differentiate the IR camera in this case.

@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.ServiceProcess;
 using System.Management;
+using System.Collections.Generic;
 
 namespace MakeWindowsHelloGreatAgain
 {
@@ -40,51 +41,76 @@ namespace MakeWindowsHelloGreatAgain
             eventLog.WriteEntry($"CameraTogglerService started. Looking for webcam: {webcamToLookFor}", EventLogEntryType.Information);
         }
         private void enableOrDisableCamera(bool enable)
-        { 
+        {
+            List<ManagementObject> devices = new List<ManagementObject>();
+            ManagementObject deviceFound = null;
+
             ManagementObjectSearcher searcher = new ManagementObjectSearcher($"SELECT * FROM Win32_PnPEntity WHERE Name LIKE '{webcamToLookFor}%'");
             foreach (ManagementObject device in searcher.Get())
             {
+                devices.Add(device);
                 //foreach (PropertyData property in device.Properties)
                 //{
                 //    Debug.WriteLine($"{property.Name}: {property.Value}");
                 //}
-                string deviceName = device["Name"]?.ToString();
-                string deviceId = device["DeviceID"]?.ToString();
-                string errorCode = device["ConfigManagerErrorCode"]?.ToString();
-                Guid ClassGuid = (device["ClassGuid"] != null ? new Guid(device["ClassGuid"].ToString()) : Guid.Empty);
+            }
+            if(devices.Count > 1)
+            {
+                if(enableVerboseLogging)
+                {
+                    eventLog.WriteEntry($"Found multiple camera devices matching '{webcamToLookFor}'. Looking for root device", EventLogEntryType.Warning);
+                }
+                foreach(ManagementObject device in devices)
+                {
+                    string id = device["DeviceID"]?.ToString();
+                    if (id != null && id.EndsWith("00"))
+                    {
+                        deviceFound = device;
+                        break;
+                    }
+                }
+            }
+            if(deviceFound == null )
+            {
+                eventLog.WriteEntry($"Did not find a root device for '{webcamToLookFor}'", EventLogEntryType.Error);
+                return;
+            }
 
-                bool isDisabled =  (errorCode != "0");// (errorCode == "22"); 22 is actually disabled, but we'll treat any error code as disabled for safety.
+            string deviceName = deviceFound["Name"]?.ToString();
+            string deviceId = deviceFound["DeviceID"]?.ToString();
+            string errorCode = deviceFound["ConfigManagerErrorCode"]?.ToString();
+            Guid ClassGuid = (deviceFound["ClassGuid"] != null ? new Guid(deviceFound["ClassGuid"].ToString()) : Guid.Empty);
 
-                if (enableVerboseLogging)
-                {
-                    eventLog.WriteEntry($"Found camera device: {deviceName}, Device ID: {deviceId}, Error Code: {errorCode}, Is Disabled: {isDisabled}", EventLogEntryType.Information);
-                }
+            bool isDisabled = (errorCode != "0");// (errorCode == "22"); 22 is actually disabled, but we'll treat any error code as disabled for safety.
 
-                if(!enable && isDisabled)
-                {
-                    eventLog.WriteEntry($"Camera is already disabled, no action will be taken.",EventLogEntryType.Warning);
-                    return;
-                }
-                if(enable && !isDisabled)
-                {
-                    eventLog.WriteEntry($"Camera is already enabled, no action will be taken.",EventLogEntryType.Warning);
-                    return;
-                }
 
-                if (enable)
-                {
-                    // args can't be null, no matter what the interwebs tell you
-                    object[] dummyargs = {"dummy", "wtf"};
-                    device.InvokeMethod("Enable", dummyargs);
-                }
-                else
-                {
-                    // args can't be null, no matter what the interwebs tell you
-                    object[] dummyargs = {"dummy", "wtf"};
-                    device.InvokeMethod("Disable", dummyargs);
-                }
-                //This garbage doesn't work anyway.
-                //SetupApi.EnableOrDisableDevice(ClassGuid, deviceId, isDisabled ? true : false);
+            if (enableVerboseLogging)
+            {
+                eventLog.WriteEntry($"Found camera device: {deviceName}, Device ID: {deviceId}, Error Code: {errorCode}, Is Disabled: {isDisabled}", EventLogEntryType.Information);
+            }
+
+            if (!enable && isDisabled)
+            {
+                eventLog.WriteEntry($"Camera is already disabled, no action will be taken.", EventLogEntryType.Warning);
+                return;
+            }
+            if (enable && !isDisabled)
+            {
+                eventLog.WriteEntry($"Camera is already enabled, no action will be taken.", EventLogEntryType.Warning);
+                return;
+            }
+
+            if (enable)
+            {
+                // args can't be null, no matter what the interwebs tell you
+                object[] dummyargs = { "dummy", "wtf" };
+                deviceFound.InvokeMethod("Enable", dummyargs);
+            }
+            else
+            {
+                // args can't be null, no matter what the interwebs tell you
+                object[] dummyargs = { "dummy", "wtf" };
+                deviceFound.InvokeMethod("Disable", dummyargs);
             }
         }
 

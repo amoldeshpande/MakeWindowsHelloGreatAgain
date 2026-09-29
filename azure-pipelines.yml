@@ -21,7 +21,10 @@ steps:
     solution: '$(solution)'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: '$(Build.SourcesDirectory)/bin/$(buildConfiguration)'
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
 - task: ArchiveFiles@2
   displayName: 'Zip Build Artifacts'
   inputs:
@@ -29,6 +32,10 @@ steps:
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/release.zip'
     replaceExistingArchive: true
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/release.zip'
+    artifact: 'release-zip'
 
 - task: GitHubRelease@1
   inputs:

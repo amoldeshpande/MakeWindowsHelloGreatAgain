@@ -1,0 +1,23 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: windows-latest
+
+steps:
+- script: MSBuild.exe MakeWindowsHelloGreatAgain.csproj -t:Build -p:Configuration=Release
+  displayName: 'Build'
+
+- task: GitHubRelease@0
+  inputs:
+    gitHubConnection: github.com_amoldeshpande
+    repositoryName: $(Build.RepositoryName)
+    tagSource: 'manual'
+    tag: $(Build.BuildNumber)
+    title: $(BuildTitle) Release From $(Build.SourceBranchName)
+    assets: $(System.DefaultWorkingDirectory)/bin/Release/*

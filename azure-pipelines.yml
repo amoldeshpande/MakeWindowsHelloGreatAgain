@@ -1,3 +1,4 @@
+# vim: se expandtab ts=4 sw=2 ai
 # Starter pipeline
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
@@ -10,8 +11,11 @@ pool:
   vmImage: windows-latest
 
 steps:
-- script: MSBuild.exe MakeWindowsHelloGreatAgain.csproj -t:Build -p:Configuration=Release
-  displayName: 'Build'
+- script: 
+    for /f "usebackq tokens=*" %%l in (`"c:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property installationPath`) do set bar=%%l
+    call "%bar%"\Common7\Tools\VsDevCmd.bat -arch=$(BuildPlatform)
+    MSBuild.exe MakeWindowsHelloGreatAgain.csproj -t:Build -p:Configuration=Release
+    displayName: 'Build'
 
 - task: GitHubRelease@0
   inputs:

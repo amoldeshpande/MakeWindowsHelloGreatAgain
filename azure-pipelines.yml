@@ -22,6 +22,14 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
+- task: ArchiveFiles@2
+  displayName: 'Zip Build Artifacts'
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/release.zip'
+    replaceExistingArchive: true
+
 - task: GitHubRelease@1
   inputs:
     gitHubConnection: github.com_amoldeshpande_somehow_different
@@ -29,4 +37,5 @@ steps:
     tagSource: 'userSpecifiedTag'
     tag: $(Build.BuildNumber)
     title: $(Build.BuildId) Release From $(Build.SourceBranchName)
-    assets: $(System.DefaultWorkingDirectory)/bin/Release/*
+    assets: '$(Build.ArtifactStagingDirectory)/release.zip'
+    assetUploadMode: 'replace'

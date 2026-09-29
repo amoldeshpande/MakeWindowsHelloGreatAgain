@@ -10,14 +10,19 @@ trigger:
 pool:
   vmImage: windows-latest
 
-steps:
-- script: 
-    for /f "usebackq tokens=*" %%l in (`"c:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property installationPath`) do set bar=%%l
-    call "%bar%"\Common7\Tools\VsDevCmd.bat -arch=$(BuildPlatform)
-    MSBuild.exe MakeWindowsHelloGreatAgain.csproj -t:Build -p:Configuration=Release
-    displayName: 'Build'
+variables:
+	solution: '**/*.slnx'
+	buildPlatform: 'Any CPU'
+	buildConfiguration: 'Release'
 
-- task: GitHubRelease@0
+steps:
+- task: VSBuild@1
+  inputs:
+  	solution: '$(solution)'
+	platform: '$(buildPlatform)'
+	configuration: '$(buildConfiguration)'
+
+- task: GitHubRelease@1
   inputs:
     gitHubConnection: github.com_amoldeshpande
     repositoryName: $(Build.RepositoryName)

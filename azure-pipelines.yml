@@ -24,7 +24,7 @@ steps:
 
 - task: GitHubRelease@1
   inputs:
-    gitHubConnection: github.com_amoldeshpande
+    gitHubConnection: github.com_amoldeshpande_somehow_different
     repositoryName: $(Build.RepositoryName)
     tagSource: 'userSpecifiedTag'
     tag: $(Build.BuildNumber)

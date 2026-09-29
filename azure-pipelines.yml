@@ -28,5 +28,5 @@ steps:
     repositoryName: $(Build.Repository.Name)
     tagSource: 'userSpecifiedTag'
     tag: $(Build.BuildNumber)
-    title: $(Build.Id) Release From $(Build.SourceBranchName)
+    title: $(Build.BuildId) Release From $(Build.SourceBranchName)
     assets: $(System.DefaultWorkingDirectory)/bin/Release/*

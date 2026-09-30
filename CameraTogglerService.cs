@@ -68,7 +68,6 @@ namespace MakeWindowsHelloGreatAgain
                             deviceFound = device;
                             break;
                         }
-                        deviceFound = device;
                         devices.Add(device);
                     }
                     //foreach (PropertyData property in device.Properties)

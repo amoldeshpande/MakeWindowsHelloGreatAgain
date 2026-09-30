@@ -2,7 +2,7 @@ In April 2025, Microsoft started requiring the color camera to see a visible fac
 
 I don't need this enhanced security, so I finally got around to creating this service to turn off the RGB camera when the user logs out or locks the computer. This allows you to sign in with the IR camera alone, which works faster and in all lighting (or lack thereof) conditions.
 
-DO NOT USE this application if you are not OK with the downgraded security. In fact, don't use it if you are not me.
+DO NOT USE this application if you are not OK with the downgraded security. 
 
 To use:
   1. Extract the release zip to a directory of your choosing.
@@ -12,5 +12,6 @@ You can use uninstall.cmd (as admin) to uninstall the service and then manually 
 
 Check that the camera string in the config file matches your color camera in Device Manager. On Alienware M16 R1s at least, the IR cameras is called "Integrated IR Webcam" and the color camera is "Integrated Webcam"
 
-Outstanding issues:
-	- Some laptops (Dell XPS 13) name both the cameras the same. I think the color camera is the root instance id (ends in all zeroes), but I am working to verify that. There is no way in the current version to differentiate the IR camera in this case.
+If your computer names the IR and color cameras exactly the same, this program will guess that the device instance ID ending in all 0s is the root color camera and disable that one. 
+
+If that doesn't work, specify a device instance ID for the camera you need to disable. Unfortunately, I am not sure how to find it except by trial and error (disable it, try Windows Hello in low-light conditions, rinse and repeat). It is called "Device Instance Path" in Device Manager. Add this ID to the config.

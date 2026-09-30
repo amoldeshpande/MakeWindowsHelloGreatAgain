@@ -32,6 +32,7 @@ namespace MakeWindowsHelloGreatAgain
             Console.WriteLine("Service is running. Press Enter to stop...");
             Console.ReadLine();
             OnStop();
+            //enableOrDisableCamera(true); 
         }
 #endif
 
@@ -53,17 +54,22 @@ namespace MakeWindowsHelloGreatAgain
                 return;
             }
 
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher($"SELECT * FROM Win32_PnPEntity WHERE Name LIKE '{webcamToLookFor}%'");
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher($"SELECT * FROM Win32_PnPEntity WHERE PNPClass = 'Camera'");
             using (ManagementObjectCollection collection = searcher.Get())
             {
                 foreach (ManagementObject device in collection)
                 {
-                    devices.Add(device);
-                    // If there is a specific device instance ID specified, check if this device matches that ID.
-                    if (!string.IsNullOrEmpty(webcamDeviceId) && device["DeviceID"]?.ToString() == webcamDeviceId)
+                    string name = device["Name"]?.ToString();
+                    if (!string.IsNullOrEmpty(name) && name.Equals(webcamToLookFor, StringComparison.OrdinalIgnoreCase))
                     {
+                        // If there is a specific device instance ID specified, check if this device matches that ID.
+                        if (!string.IsNullOrEmpty(webcamDeviceId) && device["DeviceID"]?.ToString() == webcamDeviceId)
+                        {
+                            deviceFound = device;
+                            break;
+                        }
                         deviceFound = device;
-                        break;
+                        devices.Add(device);
                     }
                     //foreach (PropertyData property in device.Properties)
                     //{
